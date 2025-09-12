@@ -16,14 +16,14 @@ public class SeedDevUser {
         return args -> {
             if (repo.findByUsuario("house").isEmpty()) {
                 Usuario u = new Usuario(
-                    "Dr. Gregory House",
-                    "house",
-                    encoder.encode("***REMOVED***"),
-                    Rol.ADMIN
+                    "house",                      // usuario
+                    "Dr. Gregory House",         // nombre
+                    encoder.encode("***REMOVED***"),  // password (BCrypt)
+                    Rol.MEDICO                   // rol
                 );
                 u.setEnabled(true);
                 repo.save(u);
-                System.out.println("✅ Usuario 'house' creado con password '***REMOVED***' (rol ADMIN)");
+                System.out.println("✅ Usuario 'house' creado con password '***REMOVED***' (rol MEDICO)");
             }
         };
     }
