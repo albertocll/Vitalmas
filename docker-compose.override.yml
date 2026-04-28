@@ -1,9 +1,7 @@
-version: "3.8"
-
 services:
   backend:
     build:
-      context: ./vitalmas-backend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: vitalmas-backend
     environment:
@@ -18,7 +16,7 @@ services:
 
   frontend:
     build:
-      context: ./vitalmas-frontend
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: vitalmas-frontend
     ports:
