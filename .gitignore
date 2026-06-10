@@ -36,3 +36,5 @@ postgres-data/
 *.war
 *.ear
 repo-tree.txt
+
+docker-compose.override.yml
