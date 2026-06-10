@@ -1,13 +1,18 @@
 package api.service;
 
-import api.repository.MedicoRepository;
-
 import java.util.List;
 import java.util.UUID;
 
-import api.model.Medico;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import api.model.Medico;
+import api.repository.MedicoRepository;
+
+@Service
 public class MedicoService {
+
     private final MedicoRepository repo;
 
     public MedicoService(MedicoRepository repo) {
@@ -15,19 +20,27 @@ public class MedicoService {
     }
 
     public List<Medico> listar() {
-        return repo.listar();
+        return repo.findAll();
     }
 
-    public Medico alta(String nombre, String especialidad) {
-        List<Medico> lista = repo.listar();
-        Medico m = new Medico(UUID.randomUUID().toString(), nombre, especialidad);
-        lista.add(m);
-        repo.guardarTodos(lista);
-        return m;
+    public Medico buscarPorId(UUID id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Médico no encontrado"));
     }
 
-    /** Necesario para que SeedConfig pueda persistir cambios (usuario/password). */
-    public void guardarTodos(List<Medico> lista) {
-        repo.guardarTodos(lista);
+    public Medico crear(Medico medico) {
+        return repo.save(medico);
+    }
+
+    public Medico actualizar(UUID id, Medico datos) {
+        Medico medico = buscarPorId(id);
+        medico.setNombre(datos.getNombre());
+        medico.setEspecialidad(datos.getEspecialidad());
+        return repo.save(medico);
+    }
+
+    public void eliminar(UUID id) {
+        buscarPorId(id);
+        repo.deleteById(id);
     }
 }
