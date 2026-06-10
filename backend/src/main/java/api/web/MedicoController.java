@@ -1,0 +1,61 @@
+package api.web;
+
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import api.model.Medico;
+import api.service.MedicoService;
+
+@RestController
+@RequestMapping("/api/medicos")
+public class MedicoController {
+
+    private final MedicoService service;
+
+    public MedicoController(MedicoService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public List<Medico> listar() {
+        return service.listar();
+    }
+
+    @GetMapping("/{id}")
+    public Medico buscarPorId(@PathVariable UUID id) {
+        return service.buscarPorId(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<Medico> crear(@RequestBody Medico medico) {
+        Medico creado = service.crear(medico);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(creado.getId())
+                .toUri();
+        return ResponseEntity.created(uri).body(creado);
+    }
+
+    @PutMapping("/{id}")
+    public Medico actualizar(@PathVariable UUID id, @RequestBody Medico medico) {
+        return service.actualizar(id, medico);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+}
