@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginBasic } from "../api";
+import { login } from "../api";
 import { useNavigate, useLocation } from "react-router-dom";
 import Button from "../components/ui/Button.jsx";
 import TextInput from "../components/ui/TextInput.jsx";
@@ -18,19 +18,13 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const data = await loginBasic(usuario, password);
-      if (!data) {
+      const token = await login(usuario, password);
+      if (!token) {
         setError("Credenciales inválidas");
         return;
       }
-      const safeAuth = {
-        tipo: data.tipo,
-        usuario: {
-          nombre: data.usuario?.nombre,
-          usuario: data.usuario?.usuario,
-        },
-      };
-      sessionStorage.setItem("auth", JSON.stringify(safeAuth));
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("usuario", usuario);
 
       const from = location.state?.from;
       const to = from
