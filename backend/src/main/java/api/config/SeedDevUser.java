@@ -12,7 +12,7 @@ import api.repository.UsuarioRepository;
 @Configuration
 public class SeedDevUser {
 
-    @SuppressWarnings("unused")
+    
     @Bean
     CommandLineRunner initUser(UsuarioRepository repo, PasswordEncoder encoder) {
         return args -> {
