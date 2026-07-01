@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import api.model.Cita;
 import api.model.Paciente;
+import api.service.CitaService;
 import api.service.PacienteService;
 
 @RestController
@@ -23,9 +25,11 @@ import api.service.PacienteService;
 public class PacienteController {
 
     private final PacienteService service;
+    private final CitaService citaService;
 
-    public PacienteController(PacienteService service) {
+    public PacienteController(PacienteService service, CitaService citaService) {
         this.service = service;
+        this.citaService = citaService;
     }
 
     @GetMapping
@@ -41,6 +45,11 @@ public class PacienteController {
     @GetMapping("/dni/{dni}")
     public Paciente buscarPorDni(@PathVariable String dni) {
         return service.buscarPorDni(dni);
+    }
+
+    @GetMapping("/{id}/citas")
+    public List<Cita> listarCitas(@PathVariable UUID id) {
+        return citaService.listarPorPaciente(id);
     }
 
     @PostMapping
