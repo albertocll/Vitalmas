@@ -42,7 +42,11 @@ public class EnfermedadController {
     @GetMapping
     public ResponseEntity<Page<Enfermedad>> listar(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String nivelRiesgo) {
+        if (nivelRiesgo != null) {
+            return ResponseEntity.ok(enfService.filtrarPorNivelRiesgo(nivelRiesgo, page, size));
+        }
         return ResponseEntity.ok(enfService.listarPaginado(page, size));
     }
 
