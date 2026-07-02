@@ -16,4 +16,5 @@ public interface EnfermedadRepository extends JpaRepository<Enfermedad, UUID> {
     @EntityGraph(attributePaths = "sintomas")
     Optional<Enfermedad> findWithSintomasByNombreIgnoreCase(String nombre);
     Page<Enfermedad> findByNivelRiesgo(String nivelRiesgo, Pageable pageable);
+    Page<Enfermedad> findBySintomasId(UUID sintomaId, Pageable pageable);
 }
