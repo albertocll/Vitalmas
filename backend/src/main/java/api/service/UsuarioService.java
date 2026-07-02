@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,9 +19,11 @@ import api.repository.UsuarioRepository;
 public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository repo;
+    private final PasswordEncoder encoder;
 
-    public UsuarioService(UsuarioRepository repo) {
+    public UsuarioService(UsuarioRepository repo, PasswordEncoder encoder) {
         this.repo = repo;
+        this.encoder = encoder;
     }
 
     // Para registrar usuarios nuevos (si quieres)
@@ -51,5 +54,14 @@ public class UsuarioService implements UserDetailsService {
         var authorities = List.of(new SimpleGrantedAuthority(roleName));
 
         return new User(usuario.getUsuario(), usuario.getPassword(), authorities);
+    }
+
+    public void cambiarPassword(String usuarioActual, String passwordActual, String passwordNueva) {
+        Usuario usuario = buscarPorUsuario(usuarioActual);
+        if (!encoder.matches(passwordActual, usuario.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Contraseña actual incorrecta");
+        }
+        usuario.setPassword(encoder.encode(passwordNueva));
+        repo.save(usuario);
     }
 }
