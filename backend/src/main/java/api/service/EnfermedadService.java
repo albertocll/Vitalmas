@@ -41,6 +41,11 @@ public class EnfermedadService {
     }
 
     @Transactional(readOnly = true)
+    public Page<Enfermedad> filtrarPorSintoma(UUID sintomaId, int page, int size) {
+        return enfermedadRepository.findBySintomasId(sintomaId, PageRequest.of(page, size));
+    }
+
+    @Transactional(readOnly = true)
     public List<Enfermedad> listar() {
         List<Enfermedad> result = new ArrayList<>();
         enfermedadRepository.findAll().forEach(result::add);
