@@ -3,6 +3,8 @@ package api.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +23,10 @@ public class PacienteService {
 
     public List<Paciente> listar() {
         return repo.findAll();
+    }
+
+    public Page<Paciente> listarPaginado(int page, int size) {
+        return repo.findAll(PageRequest.of(page, size));
     }
 
     public Paciente buscarPorId(UUID id) {
