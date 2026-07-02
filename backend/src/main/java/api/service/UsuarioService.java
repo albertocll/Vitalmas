@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import api.dto.RegistroUsuarioDTO;
 import api.model.Usuario;
 import api.repository.UsuarioRepository;
 
@@ -63,5 +64,18 @@ public class UsuarioService implements UserDetailsService {
         }
         usuario.setPassword(encoder.encode(passwordNueva));
         repo.save(usuario);
+    }
+
+    public Usuario registrar(RegistroUsuarioDTO dto) {
+        if (repo.findByUsuario(dto.getUsuario()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
+        }
+        Usuario u = new Usuario(
+                dto.getUsuario(),
+                dto.getNombre(),
+                encoder.encode(dto.getPassword()),
+                Usuario.Rol.valueOf(dto.getRol().toUpperCase()));
+        u.setEnabled(true);
+        return repo.save(u);
     }
 }
