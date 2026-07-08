@@ -22,14 +22,13 @@ export async function login(usuario, password) {
 }
 
 export async function listarEnfermedades(q) {
-  const url = q
-    ? `${BASE}/enfermedades?q=${encodeURIComponent(q)}`
-    : `${BASE}/enfermedades`
+  const url = `${BASE}/enfermedades?size=300`
   const res = await fetch(url, {
     headers: authHeaders()
   })
   if (!res.ok) throw new Error("Error listando enfermedades")
-  return res.json()
+  const data = await res.json()
+  return data.content ?? data
 }
 
 export async function getEnfermedad(nombre) {
