@@ -1,20 +1,29 @@
 package api;
 
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import api.dto.EnfermedadCreateDTO;
 import api.model.Enfermedad;
 import api.model.Sintoma;
 import api.service.EnfermedadService;
 import api.service.EnfermedadSintomaService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/enfermedades", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -24,15 +33,25 @@ public class EnfermedadController {
     private final EnfermedadSintomaService linkService;
 
     public EnfermedadController(EnfermedadService enfService,
-                                EnfermedadSintomaService linkService) {
+            EnfermedadSintomaService linkService) {
         this.enfService = enfService;
         this.linkService = linkService;
     }
 
-    // Listar todas
+    // Listar todas las enfermedades
     @GetMapping
-    public ResponseEntity<List<Enfermedad>> listar() {
-        return ResponseEntity.ok(enfService.listar());
+    public ResponseEntity<Page<Enfermedad>> listar(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String nivelRiesgo,
+            @RequestParam(required = false) UUID sintomaId) {
+        if (sintomaId != null) {
+            return ResponseEntity.ok(enfService.filtrarPorSintoma(sintomaId, page, size));
+        }
+        if (nivelRiesgo != null) {
+            return ResponseEntity.ok(enfService.filtrarPorNivelRiesgo(nivelRiesgo, page, size));
+        }
+        return ResponseEntity.ok(enfService.listarPaginado(page, size));
     }
 
     // Detalle por ID
