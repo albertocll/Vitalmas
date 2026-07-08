@@ -19,29 +19,30 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklist blacklist;
 
-    public JwtFilter(JwtUtil jwtUtil) {
+    public JwtFilter(JwtUtil jwtUtil, TokenBlacklist blacklist) {
         this.jwtUtil = jwtUtil;
+        this.blacklist = blacklist;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
-            if (jwtUtil.isTokenValid(token)) {
+            if (jwtUtil.isTokenValid(token) && !blacklist.estaInvalidado(token)) {
                 String username = jwtUtil.extractUsername(token);
                 String rol = jwtUtil.extractRol(token);
                 var auth = new UsernamePasswordAuthenticationToken(
                         username,
                         null,
-                        List.of(new SimpleGrantedAuthority(rol))
-                );
+                        List.of(new SimpleGrantedAuthority(rol)));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
