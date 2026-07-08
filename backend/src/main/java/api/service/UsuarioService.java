@@ -27,6 +27,7 @@ public class UsuarioService implements UserDetailsService {
         this.encoder = encoder;
     }
 
+    // Para registrar usuarios nuevos (si quieres)
     public Usuario crear(Usuario usuario) {
         if (repo.findByUsuario(usuario.getUsuario()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
@@ -44,18 +45,16 @@ public class UsuarioService implements UserDetailsService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
-    public Usuario registrar(RegistroUsuarioDTO dto) {
-        if (repo.findByUsuario(dto.getUsuario()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
-        }
-        Usuario u = new Usuario(
-            dto.getUsuario(),
-            dto.getNombre(),
-            encoder.encode(dto.getPassword()),
-            Usuario.Rol.valueOf(dto.getRol().toUpperCase())
-        );
-        u.setEnabled(true);
-        return repo.save(u);
+    // Spring Security lo usa en el login
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        Usuario usuario = buscarPorUsuario(username);
+
+        // Mapear el enum Rol a "ROLE_ADMIN" o "ROLE_MEDICO"
+        String roleName = "ROLE_" + usuario.getRol().name();
+        var authorities = List.of(new SimpleGrantedAuthority(roleName));
+
+        return new User(usuario.getUsuario(), usuario.getPassword(), authorities);
     }
 
     public void cambiarPassword(String usuarioActual, String passwordActual, String passwordNueva) {
@@ -67,11 +66,16 @@ public class UsuarioService implements UserDetailsService {
         repo.save(usuario);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) {
-        Usuario usuario = buscarPorUsuario(username);
-        String roleName = "ROLE_" + usuario.getRol().name();
-        var authorities = List.of(new SimpleGrantedAuthority(roleName));
-        return new User(usuario.getUsuario(), usuario.getPassword(), authorities);
+    public Usuario registrar(RegistroUsuarioDTO dto) {
+        if (repo.findByUsuario(dto.getUsuario()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
+        }
+        Usuario u = new Usuario(
+                dto.getUsuario(),
+                dto.getNombre(),
+                encoder.encode(dto.getPassword()),
+                Usuario.Rol.valueOf(dto.getRol().toUpperCase()));
+        u.setEnabled(true);
+        return repo.save(u);
     }
 }

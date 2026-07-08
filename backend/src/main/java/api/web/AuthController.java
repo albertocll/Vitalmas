@@ -9,12 +9,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import api.config.TokenBlacklist;
 import api.dto.RegistroUsuarioDTO;
 import api.service.UsuarioService;
 import api.util.JwtUtil;
@@ -28,18 +26,15 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UsuarioService usuarioService;
-    private final TokenBlacklist blacklist;
 
     public AuthController(UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder,
             JwtUtil jwtUtil,
-            UsuarioService usuarioService,
-            TokenBlacklist blacklist) {
+            UsuarioService usuarioService) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.usuarioService = usuarioService;
-        this.blacklist = blacklist;
     }
 
     @PostMapping("/login")
@@ -59,14 +54,5 @@ public class AuthController {
     public ResponseEntity<Void> register(@Valid @RequestBody RegistroUsuarioDTO dto) {
         usuarioService.registrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            blacklist.invalidar(token);
-        }
-        return ResponseEntity.noContent().build();
     }
 }
