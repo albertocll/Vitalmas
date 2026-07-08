@@ -68,7 +68,7 @@ Una vez arriba:
 | Campo | Valor |
 |-------|-------|
 | Usuario | `house` |
-| Contraseña | `house123` |
+| Contraseña | `House@2026!`|
 | Rol | `MEDICO` |
 
 ---
