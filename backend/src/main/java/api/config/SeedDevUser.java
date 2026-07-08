@@ -20,12 +20,12 @@ public class SeedDevUser {
                 Usuario u = new Usuario(
                         "house", // usuario
                         "Dr. Gregory House", // nombre
-                        encoder.encode("***REMOVED***"), // password (BCrypt)
+                        encoder.encode("House@2026!"), // password (BCrypt)
                         Rol.MEDICO // rol
                 );
                 u.setEnabled(true);
                 repo.save(u);
-                System.out.println("✅ Usuario 'house' creado con password '***REMOVED***' (rol MEDICO)");
+                System.out.println("✅ Usuario 'house' creado con password 'House@2026!' (rol MEDICO)");
             }
         };
     }
