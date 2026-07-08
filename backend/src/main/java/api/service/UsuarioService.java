@@ -8,9 +8,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import api.dto.RegistroUsuarioDTO;
 import api.model.Usuario;
 import api.repository.UsuarioRepository;
 
@@ -18,12 +20,13 @@ import api.repository.UsuarioRepository;
 public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository repo;
+    private final PasswordEncoder encoder;
 
-    public UsuarioService(UsuarioRepository repo) {
+    public UsuarioService(UsuarioRepository repo, PasswordEncoder encoder) {
         this.repo = repo;
+        this.encoder = encoder;
     }
 
-    // Para registrar usuarios nuevos (si quieres)
     public Usuario crear(Usuario usuario) {
         if (repo.findByUsuario(usuario.getUsuario()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
@@ -41,15 +44,34 @@ public class UsuarioService implements UserDetailsService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
-    // Spring Security lo usa en el login
+    public Usuario registrar(RegistroUsuarioDTO dto) {
+        if (repo.findByUsuario(dto.getUsuario()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
+        }
+        Usuario u = new Usuario(
+            dto.getUsuario(),
+            dto.getNombre(),
+            encoder.encode(dto.getPassword()),
+            Usuario.Rol.valueOf(dto.getRol().toUpperCase())
+        );
+        u.setEnabled(true);
+        return repo.save(u);
+    }
+
+    public void cambiarPassword(String usuarioActual, String passwordActual, String passwordNueva) {
+        Usuario usuario = buscarPorUsuario(usuarioActual);
+        if (!encoder.matches(passwordActual, usuario.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Contraseña actual incorrecta");
+        }
+        usuario.setPassword(encoder.encode(passwordNueva));
+        repo.save(usuario);
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) {
         Usuario usuario = buscarPorUsuario(username);
-
-        // Mapear el enum Rol a "ROLE_ADMIN" o "ROLE_MEDICO"
         String roleName = "ROLE_" + usuario.getRol().name();
         var authorities = List.of(new SimpleGrantedAuthority(roleName));
-
         return new User(usuario.getUsuario(), usuario.getPassword(), authorities);
     }
 }
