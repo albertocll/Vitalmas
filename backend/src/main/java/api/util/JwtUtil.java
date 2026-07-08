@@ -14,6 +14,7 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtil {
 
     private static final long EXPIRATION_MS = 86400000; // 24 horas
+    private static final long REFRESH_EXPIRATION_MS = 604800000; // 7 días - refresh token
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public String generateToken(String username, String rol) {
@@ -24,6 +25,25 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(key)
                 .compact();
+    }
+
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("type", "refresh")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRATION_MS))
+                .signWith(key)
+                .compact();
+    }
+
+    public boolean isRefreshToken(String token) {
+        try {
+            String type = getClaims(token).get("type", String.class);
+            return "refresh".equals(type);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String extractUsername(String token) {

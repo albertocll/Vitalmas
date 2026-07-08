@@ -9,10 +9,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import api.config.TokenBlacklist;
 import api.dto.RegistroUsuarioDTO;
 import api.service.UsuarioService;
 import api.util.JwtUtil;
@@ -26,15 +28,18 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UsuarioService usuarioService;
+    private final TokenBlacklist blacklist;
 
     public AuthController(UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder,
             JwtUtil jwtUtil,
-            UsuarioService usuarioService) {
+            UsuarioService usuarioService,
+            TokenBlacklist blacklist) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.usuarioService = usuarioService;
+        this.blacklist = blacklist;
     }
 
     @PostMapping("/login")
@@ -47,12 +52,38 @@ public class AuthController {
         }
         String rol = user.getAuthorities().iterator().next().getAuthority();
         String token = jwtUtil.generateToken(usuario, rol);
-        return Map.of("token", token);
+        String refreshToken = jwtUtil.generateRefreshToken(usuario);
+        return Map.of("token", token, "refreshToken", refreshToken);
     }
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@Valid @RequestBody RegistroUsuarioDTO dto) {
         usuarioService.registrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            blacklist.invalidar(token);
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/refresh")
+    public Map<String, String> refresh(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refreshToken");
+        if (refreshToken == null || !jwtUtil.isTokenValid(refreshToken) || !jwtUtil.isRefreshToken(refreshToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token inválido");
+        }
+        if (blacklist.estaInvalidado(refreshToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token invalidado");
+        }
+        String username = jwtUtil.extractUsername(refreshToken);
+        UserDetails user = userDetailsService.loadUserByUsername(username);
+        String rol = user.getAuthorities().iterator().next().getAuthority();
+        String newToken = jwtUtil.generateToken(username, rol);
+        return Map.of("token", newToken);
     }
 }
