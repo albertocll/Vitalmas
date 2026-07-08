@@ -9,16 +9,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import api.config.TokenBlacklist;
+import api.dto.RegistroUsuarioDTO;
 import api.service.UsuarioService;
 import api.util.JwtUtil;
-
-import api.config.TokenBlacklist;
-import org.springframework.web.bind.annotation.RequestHeader;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -46,17 +46,19 @@ public class AuthController {
     public Map<String, String> login(@RequestBody Map<String, String> body) {
         String usuario = body.get("usuario");
         String password = body.get("password");
-
         UserDetails user = userDetailsService.loadUserByUsername(usuario);
-
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
         }
-
         String rol = user.getAuthorities().iterator().next().getAuthority();
         String token = jwtUtil.generateToken(usuario, rol);
-
         return Map.of("token", token);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@Valid @RequestBody RegistroUsuarioDTO dto) {
+        usuarioService.registrar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/logout")
