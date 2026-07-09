@@ -46,9 +46,6 @@ export default function Login() {
     <div className="mt-16 grid w-full place-items-center px-4">
       <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/60 p-6 backdrop-blur">
         <h2 className="mb-2 text-xl font-semibold">Ingresar (Médico)</h2>
-        <p className="mb-4 text-sm text-slate-400">
-          Prueba: <code>house / ***REMOVED***</code>
-        </p>
 
         <form
           onSubmit={onSubmit}
