@@ -91,4 +91,9 @@ public class EnfermedadService {
         }
         return existed; // true -> 204, false -> 404
     }
+
+    @Transactional(readOnly = true)
+    public Page<Enfermedad> buscarPorNombre(String nombre, int page, int size) {
+        return enfermedadRepository.findByNombreContainingIgnoreCase(nombre, PageRequest.of(page, size));
+    }
 }
