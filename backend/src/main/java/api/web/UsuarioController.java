@@ -1,4 +1,4 @@
-package api;
+package api.web;
 
 import java.util.List;
 import java.util.UUID;
