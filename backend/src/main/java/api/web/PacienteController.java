@@ -21,6 +21,7 @@ import api.model.Cita;
 import api.model.Paciente;
 import api.service.CitaService;
 import api.service.PacienteService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/pacientes")
@@ -57,7 +58,7 @@ public class PacienteController {
     }
 
     @PostMapping
-    public ResponseEntity<Paciente> crear(@RequestBody Paciente paciente) {
+    public ResponseEntity<Paciente> crear(@Valid @RequestBody Paciente paciente) {
         Paciente creado = service.crear(paciente);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -67,7 +68,7 @@ public class PacienteController {
     }
 
     @PutMapping("/{id}")
-    public Paciente actualizar(@PathVariable UUID id, @RequestBody Paciente paciente) {
+    public Paciente actualizar(@PathVariable UUID id, @Valid @RequestBody Paciente paciente) {
         return service.actualizar(id, paciente);
     }
 
