@@ -23,8 +23,10 @@ export default function Login() {
         setError("Credenciales inválidas");
         return;
       }
-      sessionStorage.setItem("token", token);
-      sessionStorage.setItem("usuario", usuario);
+      sessionStorage.setItem("auth", JSON.stringify({
+        token,
+        usuario: { usuario }
+      }));
 
       const from = location.state?.from;
       const to = from
