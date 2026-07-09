@@ -1,4 +1,4 @@
-package api;
+package api.web;
 
 import java.net.URI;
 import java.util.List;
