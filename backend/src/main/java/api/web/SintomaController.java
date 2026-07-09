@@ -1,4 +1,4 @@
-package api;
+package api.web;
 
 import api.model.Sintoma;
 import api.repository.SintomaRepository;
