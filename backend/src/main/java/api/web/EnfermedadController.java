@@ -44,7 +44,11 @@ public class EnfermedadController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String nivelRiesgo,
-            @RequestParam(required = false) UUID sintomaId) {
+            @RequestParam(required = false) UUID sintomaId,
+            @RequestParam(required = false) String nombre) {
+        if (nombre != null && !nombre.isBlank()) {
+            return ResponseEntity.ok(enfService.buscarPorNombre(nombre, page, size));
+        }
         if (sintomaId != null) {
             return ResponseEntity.ok(enfService.filtrarPorSintoma(sintomaId, page, size));
         }
