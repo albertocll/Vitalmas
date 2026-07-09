@@ -1,7 +1,12 @@
 const BASE = import.meta.env.VITE_API_BASE || "/api"
 
 function getToken() {
-  return sessionStorage.getItem("token")
+  try {
+    const auth = JSON.parse(sessionStorage.getItem("auth") || "null");
+    return auth?.token ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function authHeaders() {
