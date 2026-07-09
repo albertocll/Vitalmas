@@ -1,4 +1,4 @@
-package api;
+package api.web;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
