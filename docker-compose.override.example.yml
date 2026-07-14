@@ -8,7 +8,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/vitalmas
       SPRING_DATASOURCE_USERNAME: vitalmas
       SPRING_DATASOURCE_PASSWORD: vitalmas
-      SPRING_PROFILES_ACTIVE: edu
+      SPRING_PROFILES_ACTIVE: prod
       SECURITY_JWT_SECRET: cambia-esta-clave-por-una-segura-en-produccion
     ports:
       - "8080:8080"
