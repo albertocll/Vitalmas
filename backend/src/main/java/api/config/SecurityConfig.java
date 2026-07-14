@@ -29,12 +29,20 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/ping", "/api/auth/login").permitAll()
+                .requestMatchers("/api/ping").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/auth/register").hasRole("ADMIN")
+                .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                .requestMatchers("/api/stats").hasRole("ADMIN")
                 .requestMatchers("/api/enfermedades/**").hasAnyRole("MEDICO", "ADMIN")
+                .requestMatchers("/api/sintomas/**").hasAnyRole("MEDICO", "ADMIN")
+                .requestMatchers("/api/medicos/**").hasAnyRole("MEDICO", "ADMIN")
+                .requestMatchers("/api/pacientes/**").hasAnyRole("MEDICO", "ADMIN")
+                .requestMatchers("/api/citas/**").hasAnyRole("MEDICO", "ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
